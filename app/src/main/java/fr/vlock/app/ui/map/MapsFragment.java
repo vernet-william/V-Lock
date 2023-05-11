@@ -5,12 +5,16 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.app.Dialog;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -20,6 +24,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -36,7 +41,7 @@ public class MapsFragment extends Fragment {
 
     private FusedLocationProviderClient location;
     private SupportMapFragment mapFragment;
-
+    private Dialog dialogMarker;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -114,9 +119,34 @@ public class MapsFragment extends Fragment {
                             MarkerOptions markerOptions = new MarkerOptions().position(coord).title("YO");
                             googleMap.addMarker(markerOptions);
                             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(coord, 15));
+                            googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                @Override
+                                public boolean onMarkerClick(@NonNull Marker marker) {
+                                    createDialog();
+                                    dialogMarker.show();
+                                    return false;
+                                }
+                            });
                         }
                     }
                 });
+            }
+        });
+    }
+
+    public void createDialog() {
+        dialogMarker = new Dialog(getContext());
+        dialogMarker.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialogMarker.setContentView(R.layout.dialog_marker);
+
+        TextView titre = dialogMarker.findViewById(R.id.txt_titre);
+        TextView etat = dialogMarker.findViewById(R.id.txt_etat);
+        Button btn_reservation = dialogMarker.findViewById(R.id.btn_reservation);
+
+        btn_reservation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogMarker.dismiss();
             }
         });
     }

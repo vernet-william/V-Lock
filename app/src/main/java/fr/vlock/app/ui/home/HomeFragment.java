@@ -9,6 +9,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import fr.vlock.app.databinding.FragmentHomeBinding;
 
@@ -23,9 +28,16 @@ public class HomeFragment extends Fragment {
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+        final RecyclerView recyclerView = binding.recyclerView;
 
-        final TextView textView = binding.textHome;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        List<FavElement> list = new ArrayList<FavElement>();
+        for(int i = 0; i < 20; i++) {
+            list.add(new FavElement("Fav Element "+Integer.toString(i)));
+        }
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(list);
+        recyclerView.setAdapter(adapter);
+
         return root;
     }
 
