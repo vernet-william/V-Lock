@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="fr.vlock.app.ui.dashboard.DashboardFragment"
+        android:name="fr.vlock.app.ui.map.MapsFragment"
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
