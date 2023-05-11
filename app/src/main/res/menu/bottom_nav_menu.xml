@@ -4,22 +4,22 @@
     <item
         android:id="@+id/navigation_home"
         android:icon="@drawable/coeur"
-        android:title="@string/title_home" />
+        android:title="Favoris" />
 
     <item
         android:id="@+id/navigation_dashboard"
         android:icon="@drawable/adresse"
-        android:title="@string/title_dashboard" />
+        android:title="Carte" />
 
     <item
         android:id="@+id/navigation_notifications"
-        android:icon="@drawable/utilisateur"
-        android:title="@string/title_notifications" />
+        android:icon="@drawable/compte"
+        android:title="Mon Compte" />
 
     <item
         android:id="@+id/navigation_4"
         android:icon="@drawable/plus"
-        android:title="4" />
+        android:title="Plus" />
 
 
 </menu>
