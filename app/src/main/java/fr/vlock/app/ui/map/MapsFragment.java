@@ -1,5 +1,7 @@
 package fr.vlock.app.ui.map;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -7,14 +9,21 @@ import androidx.fragment.app.Fragment;
 
 import android.app.Dialog;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -23,6 +32,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -35,13 +45,25 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+import fr.vlock.app.MyDatabase;
 import fr.vlock.app.R;
 
 public class MapsFragment extends Fragment {
 
     private FusedLocationProviderClient location;
     private SupportMapFragment mapFragment;
+    private MyDatabase MyDb;
+    private ArrayList<Integer> listId;
+    private ArrayList<String> listTitre, listEtat, listDesc;
+    private ArrayList<Double> listLatitude, listLongitude;
+    private ArrayList<StationElement> listStation;
     private Dialog dialogMarker;
+
+    private Drawable myDrawable;
+    private Bitmap myPoint;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -74,6 +96,22 @@ public class MapsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+
+        myDrawable = getResources().getDrawable(R.drawable.point);
+
+        MyDb = new MyDatabase(getContext());
+        MyDb.addStation("Station 1", 48.863613, 2.351853, "Disponible", "Station à Paris");
+        MyDb.addStation("Station 2", 45.632967, 4.932819, "Disponible", "Station à Lyon");
+        MyDb.addStation("Station 3", 48.285536, 4.111759, "Reservé", "Station à Troyes");
+        MyDb.addStation("Station 4", 47.210123, -1.550403, "Occupé", "Station à Nantes");
+        MyDb.addStation("Station 5", 43.600799, 1.442480, "Hors Service", "Station à Toulouse");
+        listStation = new ArrayList<>();
+        listId = new ArrayList<>();
+        listTitre = new ArrayList<>();
+        listLatitude = new ArrayList<>();
+        listLongitude = new ArrayList<>();
+        listEtat = new ArrayList<>();
+        listDesc = new ArrayList<>();
 
         location = (FusedLocationProviderClient) LocationServices.getFusedLocationProviderClient(getContext());
 
@@ -116,8 +154,20 @@ public class MapsFragment extends Fragment {
                     public void onMapReady(@NonNull GoogleMap googleMap) {
                         if(location != null){
                             LatLng coord = new LatLng(location.getLatitude(), location.getLongitude());
-                            MarkerOptions markerOptions = new MarkerOptions().position(coord).title("YO");
-                            googleMap.addMarker(markerOptions);
+
+                            readStation();
+
+                            for(int value = 0; value < listStation.size(); value++) {
+                                Log.w(TAG, "New Station : "+listStation.get(value).getTitre());
+                                LatLng point = new LatLng(listStation.get(value).getLatitude(), listStation.get(value).getLongitude());
+                                MarkerOptions markerOptions = new MarkerOptions()
+                                        .position(point)
+                                        .icon(BitmapDescriptorFactory.fromBitmap(((BitmapDrawable)myDrawable).getBitmap()))
+                                        .title(listStation.get(value).getTitre())
+                                        .snippet(listStation.get(value).getDesc());
+                                googleMap.addMarker(markerOptions);
+                            }
+
                             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(coord, 15));
                             googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                                 @Override
@@ -132,6 +182,25 @@ public class MapsFragment extends Fragment {
                 });
             }
         });
+    }
+
+    public void readStation() {
+        Cursor cursor = MyDb.readAllData();
+        if(cursor.getCount() == 0) {
+            Toast.makeText(getContext(), "No data.", Toast.LENGTH_SHORT).show();
+        } else {
+            while (cursor.moveToNext()) {
+                listId.add(cursor.getInt(0));
+                listTitre.add(cursor.getString(1));
+                listLatitude.add(cursor.getDouble(2));
+                listLongitude.add(cursor.getDouble(3));
+                listEtat.add(cursor.getString(4));
+                listDesc.add(cursor.getString(5));
+            }
+        }
+        for (int value = 0; value < listId.size(); value++) {
+            listStation.add(new StationElement(listTitre.get(value), listEtat.get(value), listDesc.get(value), listLatitude.get(value), listLongitude.get(value), listId.get(value)));
+        }
     }
 
     public void createDialog() {
