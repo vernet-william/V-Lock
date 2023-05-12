@@ -17,7 +17,7 @@
         android:title="Mon Compte" />
 
     <item
-        android:id="@+id/navigation_4"
+        android:id="@+id/navigation_plus"
         android:icon="@drawable/plus"
         android:title="Plus" />
 

@@ -24,8 +24,8 @@
         tools:layout="@layout/fragment_notifications" />
 
     <fragment
-        android:id="@+id/navigation_4"
+        android:id="@+id/navigation_plus"
         android:name="fr.vlock.app.ui.notifications2.Notifications2Fragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:label="@string/title_plus"
+        tools:layout="@layout/fragment_plus" />
 </navigation>
